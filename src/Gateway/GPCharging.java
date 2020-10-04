@@ -45,6 +45,7 @@ public class GPCharging extends Charging{
     String timestamp="";
     long tm = System.currentTimeMillis();
     long tmt;
+    HttpURLConnection sconnection;
 	    
     public GPCharging(String msisdn,String codesms,String chargecode,String msgTtrid,int amount,String game_name,int operator,String timestamp){       
         this.msisdn = msisdn;
@@ -270,6 +271,7 @@ public class GPCharging extends Charging{
                 }
                 System.out.println(resp);
                 buffer.close();
+                this.sconnection = connection;
                 connection.disconnect();
                    
                 sbData.append("Response : ");
@@ -298,4 +300,11 @@ public class GPCharging extends Charging{
     public ChargeStatus result(){
         return cs;
     }
+    public void ChargingClose() {
+    	try {
+            this.sconnection.disconnect();
+    	}catch (Exception e) {
+            e.printStackTrace();
+    	}
+    }  
 }

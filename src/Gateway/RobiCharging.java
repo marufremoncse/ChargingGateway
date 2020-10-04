@@ -360,7 +360,6 @@ public class RobiCharging extends Charging{
     	}catch (Exception e) {
             e.printStackTrace();
     	}
-    }
-    
+    }    
 }
 

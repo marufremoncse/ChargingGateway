@@ -35,6 +35,7 @@ public class BLCharging extends Charging{
     String timestamp="";
     long tm = System.currentTimeMillis();
     long tmt;
+    HttpURLConnection sconnection;
     
     public BLCharging(String msisdn,String codesms,String chargecode,String msgTtrid,int amount,String game_name,int operator,String timestamp){       
         this.msisdn = msisdn;
@@ -53,12 +54,13 @@ public class BLCharging extends Charging{
             System.out.println(charging_url);
             String chargeresponse = "";            
             URL url = new URL(charging_url);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(10000);
-            conn.setReadTimeout(10000);
-            conn.setRequestMethod("GET");
-            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setConnectTimeout(10000);
+            connection.setReadTimeout(10000);
+            connection.setRequestMethod("GET");
+            this.sconnection = connection;
+            BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
             String line;
             while ((line = rd.readLine()) != null) {

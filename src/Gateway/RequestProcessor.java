@@ -45,9 +45,16 @@ public class RequestProcessor extends Thread {
     }
 
     public void run() {
+        long tm = System.currentTimeMillis();
+        long tmt=0;
         System.out.println("Starting Thread :" + threadID);
         int qSize = reqQ.getQueueSize();
+        this.setPong(0);
         for (int i = 0; i < qSize; i++) {
+            this.setPong(0);
+            tmt=System.currentTimeMillis();
+            reqQ.parent.updateProcessTime(tmt-tm);
+            tm = System.currentTimeMillis();
             RequestDetails requestDetails = reqQ.getFromQueue(i);
             try{
                 System.out.println("Processing Request Details :" + i + " of Thread " + threadID);
