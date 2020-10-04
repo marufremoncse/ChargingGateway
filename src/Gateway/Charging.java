@@ -14,4 +14,7 @@ public class Charging {
     public ChargeStatus result(){
         return cs;
     }
+    public void ChargingClose(){
+        
+    }
 }

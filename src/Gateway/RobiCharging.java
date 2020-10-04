@@ -354,11 +354,11 @@ public class RobiCharging extends Charging{
         return cs;
     }
     
-    public void SoapClose() {
+    public void ChargingClose() {
     	try {
-    		this.sconnection.close();
+            this.sconnection.close();
     	}catch (Exception e) {
-    		e.printStackTrace();
+            e.printStackTrace();
     	}
     }
     

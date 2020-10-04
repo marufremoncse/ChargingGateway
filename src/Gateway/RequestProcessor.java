@@ -34,7 +34,11 @@ public class RequestProcessor extends Thread {
     RequestQueue reqQ;
     int threadID;
     String encodeFormat="UTF-8";
-
+    long ping=0,pong=0;
+    Charging chrg=null;
+    HttpURLConnection conng;
+    int socketval=0;
+    
     public RequestProcessor(RequestQueue reqQ, int threadID) {
         this.reqQ = reqQ;
         this.threadID = threadID;
@@ -298,9 +302,12 @@ public class RequestProcessor extends Thread {
         String timeStamp = getChargingTimeStamp(requestDetails);
         String msgid = requestDetails.getMsgid();
         int operator = requestDetails.getOperator();
+        long tm = System.currentTimeMillis();
+        ping=tm;
+        this.setPong(1);//pong=-1;
+        this.socketval=1;
         
         ChargeStatus cs=new ChargeStatus();
-        Charging chrg=null;
         if(chargeconf!=null){
             switch(operator){
                 case 1:
@@ -332,6 +339,13 @@ public class RequestProcessor extends Thread {
                     break;
             }    
         }
+        long tmt = System.currentTimeMillis();
+        this.setPong(0);//pong=0;
+        this.chrg=null;
+        long tt=tmt - tm;
+        reqQ.parent.updateOperatorTime(tt);
+        cs.setTt(tt);
+        this.socketval=0;
         return cs;
     } 
 
@@ -390,6 +404,8 @@ public class RequestProcessor extends Thread {
             System.out.println("URL::"+httpurl);
             URL url = new URL(httpurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            this.conng=conn;
+            this.socketval=2;
             conn.setConnectTimeout(20000);
             conn.setReadTimeout(20000);
             conn.setRequestMethod("GET");
@@ -429,11 +445,11 @@ public class RequestProcessor extends Thread {
     }
 	
     public void sentNotification(RequestDetails requestDetails,ChargeStatus cs){
-        //public Status process(RequestDetails requestDetails,SenderInfo senderinfo, Route route){
         System.out.print("THREAD:" + threadID + "->ReqID:" + requestDetails.getId() + " MSISDN:" + requestDetails.getMsisdn());
         boolean status=false;
         String API_RESPONSE = "";
         int price=requestDetails.getPrice();
+        
         long tm = System.currentTimeMillis();
         ping=tm;
         this.setPong(1);//pong=-1;
@@ -461,6 +477,8 @@ public class RequestProcessor extends Thread {
             System.out.println("URL::"+httpurl);
             URL url = new URL(httpurl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            this.conng=conn;
+            this.socketval=2;
             conn.setConnectTimeout(20000);
             conn.setReadTimeout(20000);
             conn.setRequestMethod("GET");
@@ -491,10 +509,7 @@ public class RequestProcessor extends Thread {
         
         long tt=tmt - tm;
         reqQ.parent.updateGameTime(tt);
-        st.setTt(tt);
         this.socketval=0;
-        
-	//	return st;
     }
     
     public long getPing() {
@@ -508,33 +523,32 @@ public class RequestProcessor extends Thread {
     public synchronized void setPong(int option) {
     	switch(option){
     	case 2:
-    		if(this.pong!=0)
-    			this.pong=System.currentTimeMillis();
-    		break;
+            if(this.pong!=0)
+                this.pong=System.currentTimeMillis();
+            break;
     	case 0:
-    		this.pong=0;
-    		break;
+            this.pong=0;
+            break;
     	case 1:
-    		this.pong=-1;    		
-    		
+            this.pong=-1;    	    		
     	}
     }
     
     public synchronized void forceSocket() {
     	this.reqQ.parent.updateForceCouter(1);
     	try {
-    	switch(this.socketval) {
-    	case 1:
-            System.out.println("##watchdog##Robi Charging SOAP forced disconnect");
-            if(this.rcgwg!=null)
-                this.rcgwg.SoapClose();
-            break;
-    	case 2:
-            System.out.println("##watchdog##Robi Game Unlock Socket forced disconnect");
-            if(this.conng!=null)
-                this.conng.disconnect();
-            break;
-    	}
+            switch(this.socketval) {
+                case 1:
+                    System.out.println("##watchdog##Charging Socket forced disconnect");
+                    if(this.chrg!=null)
+                        this.chrg.ChargingClose();
+                    break;
+                case 2:
+                    System.out.println("##watchdog##Game Unlock Socket forced disconnect");
+                    if(this.conng!=null)
+                        this.conng.disconnect();
+                    break;
+            }
     	}catch(Exception e) {
             e.printStackTrace();
     	}

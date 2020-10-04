@@ -23,6 +23,11 @@ import java.util.Vector;
  */
 public class CGW {
 
+    long serverResponseTime;
+    long operatorResponseTime;
+    long gameResponseTime;
+    int numOfReq,numOfReqp,numOfForced;
+    
     Connection con_conf, con_op;
     
     Vector<RequestQueue> reqQList = new Vector<RequestQueue>();
@@ -39,6 +44,13 @@ public class CGW {
 
     public CGW(int operator) {
       
+        this.serverResponseTime=0;
+        this.operatorResponseTime=0;
+        this.gameResponseTime=0;
+        this.numOfReq=0;
+        this.numOfReqp=0;
+        this.numOfForced=0;
+    
         this.operator = operator;
     	dbHandler_conf = new DBHandler("conf");
         dbHandler_op = new DBHandler("op");
@@ -561,6 +573,7 @@ public class CGW {
         }
         return noOfThread;
     }    
+    
     public void setRunningStartStopTime(boolean status) {
        
         Statement statement = null;
@@ -585,6 +598,44 @@ public class CGW {
         }
         
     }
+    
+    public synchronized void updateReqCouter(int req) {
+    	this.numOfReqp+=req;
+    }
+    public synchronized void updateForceCouter(int req) {
+    	this.numOfForced+=req;
+    }
+    public synchronized void updateProcessTime(long protime) {
+    	this.serverResponseTime+=protime;
+    }
+    public synchronized void updateOperatorTime(long protime) {
+    	this.operatorResponseTime+=protime;
+    }
+    public synchronized void updateGameTime(long protime) {
+    	this.gameResponseTime+=protime;
+    }
+    public synchronized boolean insertProcessLog(){
+    	try {
+            String sqli = "insert into iat_process_log(total_request_q,total_request_p,process_time,operator_time,game_time,pro_id,total_forced) "
+	        		+ "values("+this.numOfReq+","+this.numOfReqp+","+this.serverResponseTime+","+this.operatorResponseTime+","+this.gameResponseTime+",1,"+this.numOfForced+")";
+            
+            System.out.println("process log insert query::"+sqli);
+            Statement stsqli = con_op.createStatement();
+            stsqli.executeUpdate(sqli);
+            stsqli.close();
+            this.numOfReq=0;
+            this.numOfForced=0;
+            this.numOfReqp=0;
+            this.serverResponseTime=0;
+            this.operatorResponseTime=0;
+            this.gameResponseTime=0;
+            return true;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean isRunning() {
         boolean status = true;
         int status_i = 1;
