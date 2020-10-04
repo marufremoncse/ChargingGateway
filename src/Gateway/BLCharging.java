@@ -128,4 +128,11 @@ public class BLCharging extends Charging{
     public ChargeStatus result(){
         return cs;
     }
+    public void ChargingClose() {
+    	try {
+            this.sconnection.disconnect();
+    	}catch (Exception e) {
+            e.printStackTrace();
+    	}
+    }  
 }
