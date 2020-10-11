@@ -167,10 +167,10 @@ public class CGW {
                     }
                 }*/
                 WatchDog wdog=new WatchDog(this,numThread);
-	            wdog.start();
-	            try {
-                	if(wdog.isAlive())
-                		wdog.join();
+                wdog.start();
+                try {
+                    if(wdog.isAlive())
+                        wdog.join();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -292,8 +292,7 @@ public class CGW {
         }
     }
     
-//     public synchronized boolean insertDeviceLog(RequestDetails requestDetails){
-      public boolean insertDeviceLog(RequestDetails requestDetails){
+    public boolean insertDeviceLog(RequestDetails requestDetails){
     	try {
             long id=requestDetails.getId();
             String msisdn=requestDetails.getMsisdn();
@@ -370,7 +369,6 @@ public class CGW {
         }
     }
      
-//     public synchronized boolean insertUnlockCodeLog(RequestDetails requestDetails,String response,long opduration){
     public boolean insertUnlockCodeLog(RequestDetails requestDetails,String response,long opduration){
     	try {
             long id=requestDetails.getId();
@@ -401,8 +399,7 @@ public class CGW {
             return false;
         }
     }
-//    public synchronized boolean insertChargeSuccesslog(RequestDetails requestDetails,ChargeStatus cs,ChargeConf cc) {
-   
+ 
     public boolean insertChargeSuccesslog(RequestDetails requestDetails,ChargeStatus cs,ChargeConf cc) {
         try {
             int amount=cc.getPrice();
@@ -438,7 +435,6 @@ public class CGW {
         }
     }
     
-//    public synchronized boolean insertChargeFaillog(RequestDetails requestDetails,ChargeStatus cs,ChargeConf cc) {
     public boolean insertChargeFaillog(RequestDetails requestDetails,ChargeStatus cs,ChargeConf cc) {
         try {
         	
@@ -474,7 +470,6 @@ public class CGW {
         }
     }
     
-//  public synchronized boolean insertSMSSent(RequestDetails requestDetails,String replysms) {
     public boolean insertSMSSent(RequestDetails requestDetails,String replysms,int rcode) {
         try {
             long id=requestDetails.getId();
@@ -616,7 +611,7 @@ public class CGW {
     }
     public synchronized boolean insertProcessLog(){
     	try {
-            String sqli = "insert into iat_process_log(total_request_q,total_request_p,process_time,operator_time,game_time,pro_id,total_forced) "
+            String sqli = "insert into cbs_process_log(total_request_q,total_request_p,process_time,operator_time,game_time,pro_id,total_forced) "
 	        		+ "values("+this.numOfReq+","+this.numOfReqp+","+this.serverResponseTime+","+this.operatorResponseTime+","+this.gameResponseTime+",1,"+this.numOfForced+")";
             
             System.out.println("process log insert query::"+sqli);
@@ -641,7 +636,7 @@ public class CGW {
         int status_i = 1;
         Statement statement = null;
         ResultSet resultSet = null;
-        String sql = "select status from cbs_app_conf where  id = 1 and operator = " + operator;
+        String sql = "select status from cbs_app_conf where  id=1 and operator = " + operator;
         System.out.println("checking if Running: " + sql);
         try {
             statement = con_op.createStatement();

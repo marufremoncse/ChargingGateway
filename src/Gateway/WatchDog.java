@@ -49,7 +49,7 @@ public class WatchDog extends Thread {
                         System.out.println("##watchdog##Time Gap:"+gap+" For thread:"+t);
                         if(gap>maxgaptime) {
                             System.out.println("##watchdog##Need Attention##Time Gap:"+gap+" For thread:"+t);
-                            reqt.forceSocket();
+                            reqt.forceSocket();                               
                         }
                     }                		
                 }	                    
@@ -58,9 +58,9 @@ public class WatchDog extends Thread {
             }
         }
         try {
-                Thread.sleep(1000);
+            Thread.sleep(1000);                   
         }catch (Exception ex) {
-        ex.printStackTrace();
+            ex.printStackTrace();
         }
     }
     	

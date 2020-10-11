@@ -114,9 +114,17 @@ public class RequestProcessor extends Thread {
                                                             continue;
                                                         }
                                                         if(chargeconf.getPrice()==0) {
-                                                            cs.setGWStatus("100", requestDetails.getOperator());
+                                                            switch(requestDetails.getOperator()){
+                                                                case 1:
+                                                                    cs.setGWStatus("100", 1);
+                                                                    break;
+                                                                case 2:
+                                                                case 3:
+                                                                    cs.setGWStatus("SUCCESS", requestDetails.getOperator());                                                                    
+                                                                    break;
+                                                            }
                                                             cs.setResponse("0 charge bypass");
-                                                            cs.setTrid("0");
+                                                            cs.setTrid("0"); 
                                                         }else
                                                             cs = process_dob(requestDetails,chargeconf,codesms);
                                                         if(cs.getStatus()==0){
@@ -240,7 +248,7 @@ public class RequestProcessor extends Thread {
                                     }                                    
                                 }
                                 else {
-                                    String msg = "Invalid Request. Keyword charge not configured";
+                                    String msg = "Invalid Request. Keyword charge not configured";           
                                     reqQ.parent.insertSMSSent(requestDetails, keyworddetails.getChargesmserror(),7);
                                     requestDetails.setGamename("BTRC");
                                     ChargeStatus cs= process_dob(requestDetails,null,msg);
@@ -248,7 +256,11 @@ public class RequestProcessor extends Thread {
                             }
                             else {
                                 String msg = "Invalid Request. Message process Error(MO Parse)";
-                                reqQ.parent.insertSMSSent(requestDetails,keyworddetails.getChargesmserror(),5);
+                                if(keyworddetails.getGametype().equals("BTRC")){
+                                    reqQ.parent.insertSMSSent(requestDetails, keyworddetails.getUnlocksms(),5);
+                                }
+                                else
+                                    reqQ.parent.insertSMSSent(requestDetails,msg,5);
                                 requestDetails.setGamename("BTRC");
                                 ChargeStatus cs= process_dob(requestDetails,null,msg);
                             }
@@ -321,12 +333,15 @@ public class RequestProcessor extends Thread {
                     amount=chargeconf.getPrice();
                     chargecode = chargeconf.getChargecode();
                     chrg = new BLCharging(msisdn,codesms,chargecode,msgid,amount,game_name,operator,timeStamp);
+                    chrg.charging();
                     break;
                 case 2:
                     chrg = new GPCharging(msisdn,codesms,chargecode,msgid,amount,game_name,operator,timeStamp);
+                    chrg.charging();
                     break;
                 case 3: 
-                    chrg = new RobiCharging(msisdn,codesms,chargecode,msgid,chargeconf.getPriceWithVat(),game_name,operator,timeStamp);                    
+                    chrg = new RobiCharging(msisdn,codesms,chargecode,msgid,chargeconf.getPriceWithVat(),game_name,operator,timeStamp); 
+                    chrg.charging();
                     break;
             }
             cs = chrg.result();            
@@ -341,7 +356,7 @@ public class RequestProcessor extends Thread {
                     cs.setTt(0);
                     break;
                 case 2:
-                    chrg = new GPCharging(msisdn,codesms,chargecode,msgid,amount,game_name,operator,timeStamp);
+                    //chrg = new GPCharging(msisdn,codesms,chargecode,msgid,amount,game_name,operator,timeStamp);
                     cs = chrg.result();
                     break;
             }    
@@ -545,17 +560,19 @@ public class RequestProcessor extends Thread {
     	this.reqQ.parent.updateForceCouter(1);
     	try {
             switch(this.socketval) {
-                case 1:
-                    System.out.println("##watchdog##Charging Socket forced disconnect");
-                    if(this.chrg!=null)
-                        this.chrg.ChargingClose();
+                case 1:   
+                    if(this.chrg!=null){
+                        System.out.println("##Watchdog##Charging Socket forcefully disconnected");
+                        this.chrg.chargingClose();
+                    }                        
                     break;
-                case 2:
-                    System.out.println("##watchdog##Game Unlock Socket forced disconnect");
-                    if(this.conng!=null)
-                        this.conng.disconnect();
+                case 2:                    
+                    if(conng!=null){
+                        System.out.println("##Watchdog##Game Unlock Socket forcefully disconnected");
+                        conng.disconnect();
+                    }                        
                     break;
-            }
+            }         
     	}catch(Exception e) {
             e.printStackTrace();
     	}

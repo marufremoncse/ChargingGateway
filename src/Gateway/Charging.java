@@ -14,7 +14,10 @@ public class Charging {
     public ChargeStatus result(){
         return cs;
     }
-    public void ChargingClose(){
+    public void chargingClose(){
+        
+    }
+    public void charging(){
         
     }
 }

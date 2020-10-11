@@ -45,7 +45,7 @@ public class BLCharging extends Charging{
         this.game_name = game_name;
         this.operator = operator;
         this.timestamp = timestamp;
-        charging();
+        //charging();
     }
     
     public void charging(){

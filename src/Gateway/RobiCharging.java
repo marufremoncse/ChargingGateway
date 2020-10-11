@@ -81,7 +81,7 @@ public class RobiCharging extends Charging{
         this.operator = operator;
         this.timestamp = timestamp;
         timeformate.applyPattern("yyyyMMddHHmmss");
-        charging();
+        //charging();
     }
        
     public void charging(){
@@ -95,7 +95,9 @@ public class RobiCharging extends Charging{
         String nres = "";
         String res="",fee,retval="FAIL";
         String soapActionipAndPort="192.168.51.168:8310";
+        //String soapActionipAndPort="192.168.230.27";        
         String chargeAmountRequest="AmountChargingService/services/AmountCharging";
+        //String chargeAmountRequest="game_bill/robiGameBillingWrapper.php";
          header = new Hashtable();
         String soapAction = "chargeAmount";
         header.put("Content-Type", "text/xml; charset=utf-8");
@@ -238,6 +240,7 @@ public class RobiCharging extends Charging{
 
                 SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
                 connection = soapConnectionFactory.createConnection();
+                
                 URL endpoint = new URL(urlStr);
                 SOAPMessage response = connection.call(message, endpoint);
                 SOAPBody responseBody= response.getSOAPPart().getEnvelope().getBody();
@@ -353,8 +356,8 @@ public class RobiCharging extends Charging{
     public ChargeStatus result(){
         return cs;
     }
-    
-    public void ChargingClose() {
+    @Override
+    public void chargingClose() {
     	try {
             this.sconnection.close();
     	}catch (Exception e) {
